@@ -1,0 +1,39 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-read --allow-write --allow-net src/main.ts",
+    "test": "deno test --allow-read",
+    "test:rebase": "deno test --allow-read --allow-write -- -u",
+    "format": "deno fmt",
+    "lint": "deno lint"
+  },
+  "compilerOptions": {
+    "strict": true
+  },
+  "lint": {
+    "files": {
+      "include": [
+        "src/",
+        "test/"
+      ]
+    }
+  },
+  "fmt": {
+    "options": {
+      "semiColons": false,
+      "singleQuote": true
+    },
+    "files": {
+      "include": [
+        "src/",
+        "test/"
+      ]
+    }
+  },
+  "test": {
+    "files": {
+      "include": [
+        "test/"
+      ]
+    }
+  }
+}

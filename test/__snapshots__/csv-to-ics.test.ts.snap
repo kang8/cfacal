@@ -1,0 +1,29 @@
+export const snapshot = {};
+
+snapshot[`CSV parse 1`] = `
+[
+  {
+    cinima: "小西天",
+    endTime: "2023-05-20 12:57:00",
+    englishName: "Love Letter",
+    name: "情书",
+    playTime: "2023-05-20 11:00:00",
+    year: "1995",
+  },
+  {
+    cinima: "百子湾",
+    endTime: "2023-05-20 15:23:00",
+    englishName: "",
+    name: "弗兰兹",
+    playTime: "2023-05-20 13:30:00",
+    year: "2016",
+  },
+]
+`;
+
+snapshot[`Parse title 1`] = `
+[
+  "小西天|弗兰兹",
+  "百子湾|黑猫白猫(Black Cat, White Cat)",
+]
+`;
