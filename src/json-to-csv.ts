@@ -14,22 +14,7 @@ export const csvHeader = [
 ]
 
 export function getFirstDayOfNextMonth(date: Date = new Date()): Date {
-  const readableMonth = date.getMonth() + 1
-  let readableMonthInNextMonth = readableMonth + 1
-
-  const lastDayInNextMonth = new Date(
-    date.getFullYear(),
-    readableMonth + 1,
-    0,
-  )
-
-  const yearInNextMonth = lastDayInNextMonth.getFullYear()
-
-  readableMonthInNextMonth = readableMonthInNextMonth > 12
-    ? readableMonthInNextMonth % 12
-    : readableMonthInNextMonth
-
-  return new Date(yearInNextMonth, readableMonthInNextMonth - 1, 1)
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1)
 }
 
 export function parseCinema(
@@ -38,34 +23,29 @@ export function parseCinema(
 ): string {
   const cinema = cinemaInfo.slice(0, 3)
 
-  if (cinema === '小西天') {
-    if (movieHall === '2号厅') {
-      return `${cinema}(2)`
-    }
+  switch (cinema) {
+    case '小西天':
+      if (movieHall === '2号厅') {
+        return `${cinema}(2)`
+      }
 
-    return cinema
-  } else if (cinema === '百子湾') {
-    return cinema
+      return cinema
+    case '百子湾':
+      return cinema
   }
 
   throw new Error(`Do not support cinema: [${cinemaInfo}].`)
 }
 
 export function formatJson(json: Body): Array<Movie> {
-  const movies: Array<Movie> = []
-
-  json.data.records.forEach((record) => {
-    movies.push({
-      name: record.movieInfo.movieName,
-      englishName: record.movieInfo.englishName,
-      year: parseInt(record.movieInfo.movieTime),
-      cinima: parseCinema(record.cinemaInfo, record.movieHall),
-      playTime: record.playTime,
-      endTime: record.endTime,
-    })
-  })
-
-  return movies
+  return json.data.records.map<Movie>((record) => ({
+    name: record.movieInfo.movieName,
+    englishName: record.movieInfo.englishName,
+    year: parseInt(record.movieInfo.movieTime),
+    cinima: parseCinema(record.cinemaInfo, record.movieHall),
+    playTime: record.playTime,
+    endTime: record.endTime,
+  }))
 }
 
 export function sortByPlayTime(movies: Movie[]) {
@@ -80,9 +60,11 @@ export async function fetchJsonAndConvertToCsv() {
   const movies: Array<Movie> = []
   const url: URL = new URL(cfaApi)
 
-  const nextDay: Date = new Date(firstDayOfNextMonth)
-
-  do {
+  for (
+    const nextDay = new Date(firstDayOfNextMonth);
+    firstDayOfNextMonth.getMonth() === nextDay.getMonth();
+    nextDay.setDate(nextDay.getDate() + 1)
+  ) {
     url.search = new URLSearchParams({
       playTime: dateFormat(nextDay, 'yyyy-MM-dd HH:mm:ss'),
     }).toString()
@@ -91,9 +73,7 @@ export async function fetchJsonAndConvertToCsv() {
     const json = await res.json() as Body
 
     movies.push(...formatJson(json))
-
-    nextDay.setDate(nextDay.getDate() + 1)
-  } while (firstDayOfNextMonth.getMonth() === nextDay.getMonth())
+  }
 
   sortByPlayTime(movies)
 

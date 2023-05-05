@@ -24,7 +24,6 @@ export function parseTitle(movie: Movie): string {
 }
 
 export async function csvToIcs() {
-  const events: EventAttributes[] = []
   const movies: Movie[] = []
 
   for await (const file of Deno.readDir(metaDir)) {
@@ -37,15 +36,13 @@ export async function csvToIcs() {
 
   sortByPlayTime(movies)
 
-  movies.forEach((movie) => {
-    events.push({
-      calName: '电影资料馆',
-      start: parseDate(new Date(movie.playTime)),
-      end: parseDate(new Date(movie.endTime)),
-      title: parseTitle(movie),
-      description: 'TBD',
-    })
-  })
+  const events = movies.map<EventAttributes>((movie) => ({
+    calName: '电影资料馆',
+    start: parseDate(new Date(movie.playTime)),
+    end: parseDate(new Date(movie.endTime)),
+    title: parseTitle(movie),
+    description: 'TBD',
+  }))
 
   createEvents(events, async (error, value) => {
     if (error) throw error

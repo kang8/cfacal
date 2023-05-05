@@ -33,20 +33,21 @@ Deno.test(
   'Iterate through all days of the next month',
   async (t) => {
     const firstDay = getFirstDayOfNextMonth(new Date('2023-04-25'))
-    const nextDay: Date = new Date(firstDay)
     const url = new URL('https://kang.test')
 
     const days: Array<string> = []
 
-    do {
+    for (
+      const nextDay = new Date(firstDay);
+      firstDay.getMonth() === nextDay.getMonth();
+      nextDay.setDate(nextDay.getDate() + 1)
+    ) {
       url.search = new URLSearchParams({
         playTime: dateFormat(nextDay, 'yyyy-MM-dd HH:mm:ss'),
       }).toString()
 
       days.push(url.toString())
-
-      nextDay.setDate(nextDay.getDate() + 1)
-    } while (firstDay.getMonth() === nextDay.getMonth())
+    }
 
     await assertSnapshot(t, days)
   },

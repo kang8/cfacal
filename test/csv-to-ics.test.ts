@@ -31,13 +31,7 @@ Deno.test('Parse title', async (t) => {
     year: 1998,
   }]
 
-  const titles: string[] = []
-
-  movies.forEach((movie) => {
-    const title = parseTitle(movie)
-
-    titles.push(title)
-  })
+  const titles = movies.map(parseTitle)
 
   await assertSnapshot(t, titles)
 })
