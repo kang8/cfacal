@@ -10,30 +10,22 @@
     "strict": true
   },
   "lint": {
-    "files": {
-      "include": [
-        "src/",
-        "test/"
-      ]
-    }
+    "include": [
+      "src/",
+      "test/"
+    ]
   },
   "fmt": {
-    "options": {
-      "semiColons": false,
-      "singleQuote": true
-    },
-    "files": {
-      "include": [
-        "src/",
-        "test/"
-      ]
-    }
+    "semiColons": false,
+    "singleQuote": true,
+    "include": [
+      "src/",
+      "test/"
+    ]
   },
   "test": {
-    "files": {
-      "include": [
-        "test/"
-      ]
-    }
+    "include": [
+      "test/"
+    ]
   }
 }
