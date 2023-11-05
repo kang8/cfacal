@@ -1,7 +1,7 @@
 import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
 import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
-import { metaDir } from './csv-to-ics.ts'
+import { csvDir } from './csv-to-ics.ts'
 
 const cfaApi = 'https://yt5.cfa.org.cn/api/libraryapi/arrangementPage'
 export const csvHeader = [
@@ -54,15 +54,13 @@ export function sortByPlayTime(movies: Movie[]) {
   })
 }
 
-export async function fetchJsonAndConvertToCsv() {
-  const firstDayOfNextMonth = getFirstDayOfNextMonth()
-
+export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   const movies: Array<Movie> = []
   const url: URL = new URL(cfaApi)
 
   for (
-    const nextDay = new Date(firstDayOfNextMonth);
-    firstDayOfNextMonth.getMonth() === nextDay.getMonth();
+    const nextDay = new Date(firstDayOfMonth);
+    firstDayOfMonth.getMonth() === nextDay.getMonth();
     nextDay.setDate(nextDay.getDate() + 1)
   ) {
     url.search = new URLSearchParams({
@@ -78,7 +76,7 @@ export async function fetchJsonAndConvertToCsv() {
   sortByPlayTime(movies)
 
   Deno.writeTextFile(
-    `${metaDir}/${dateFormat(firstDayOfNextMonth, 'yyyy-MM')}.csv`,
+    `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`,
     csvStringify(movies, {
       columns: csvHeader,
     }),
