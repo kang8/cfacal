@@ -13,6 +13,8 @@ import {
         ? new Date(Date.parse(Deno.args[1]))
         : getFirstDayOfNextMonth()
 
+      // TODO: current month or next month
+      // await fetchJsonAndConvertToCsv(date)
       await fetchJsonAndConvertToCsv(date)
       break
     }

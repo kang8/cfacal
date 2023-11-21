@@ -132,6 +132,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
 
       patch = diffOutputs.join('\n')
     } else {
+      // TODO: change to '2023-11, without any change'
       console.info('Without any change!!!');
     }
 
