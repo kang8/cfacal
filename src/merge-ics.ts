@@ -30,15 +30,15 @@ export async function mergeIcsFiles() {
       const icsContent = await Deno.readTextFile(
         `${icsDir}/${dateFormat(event, 'yyyy-MM')}.ics`,
       )
-      const icsContents = icsContent.split('\r\n');
+      const icsContents = icsContent.split('\r\n')
 
       if (header === '') {
         header = icsContents.slice(
           icsContents.indexOf('BEGIN:VCALENDAR'),
-          icsContents.indexOf('BEGIN:VEVENT')
+          icsContents.indexOf('BEGIN:VEVENT'),
         ).join('\n')
 
-        finalIcs = header;
+        finalIcs = header
       }
 
       if (footer === '') {
@@ -56,7 +56,7 @@ export async function mergeIcsFiles() {
     }
   }
 
-  finalIcs += '\n' + footer;
+  finalIcs += '\n' + footer
 
   await Deno.writeTextFile('./assets/event.ics', finalIcs)
 }

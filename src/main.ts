@@ -3,8 +3,8 @@ import {
   fetchJsonAndConvertToCsv,
   getFirstDayOfNextMonth,
 } from './json-to-csv.ts'
-;import { mergeIcsFiles } from './merge-ics.ts';
-(async () => {
+import { mergeIcsFiles } from './merge-ics.ts'
+;(async () => {
   const action = Deno.args[0]
 
   switch (action) {

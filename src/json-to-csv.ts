@@ -99,7 +99,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     const { stdout } = await diffCommand.output()
     const diffOutput = new TextDecoder().decode(stdout)
 
-    console.log(diffOutput); // always output diff message for debugging
+    console.log(diffOutput) // always output diff message for debugging
 
     const diffOutputs = diffOutput.split('\n')
 
@@ -133,7 +133,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       patch = diffOutputs.join('\n')
     } else {
       // TODO: change to '2023-11, without any change'
-      console.info('Without any change!!!');
+      console.info('Without any change!!!')
     }
 
     Deno.writeTextFile(patchFileName, patch)
@@ -147,14 +147,14 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       stdin: 'piped',
     })
 
-    const child = patchCommand.spawn();
+    const child = patchCommand.spawn()
 
-    const file = await Deno.open(patchFileName);
+    const file = await Deno.open(patchFileName)
     await file.readable.pipeTo(child.stdin, {
-      preventClose: true
+      preventClose: true,
     })
 
-    await child.stdin.close();
+    await child.stdin.close()
 
     Deno.remove(patchFileName)
     Deno.remove(filePath + '.new')
