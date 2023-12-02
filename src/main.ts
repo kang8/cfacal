@@ -9,10 +9,6 @@ import { mergeIcsFiles } from './merge-ics.ts'
 
   switch (action) {
     case 'fetch': { // 'fetch' or 'fetch 2023-11'
-      const date = Deno.args[1]
-        ? new Date(Date.parse(Deno.args[1]))
-        : getFirstDayOfNextMonth()
-
       if (Deno.args[1]) {
         await fetchJsonAndConvertToCsv(new Date(Date.parse(Deno.args[1]))) // specified month
       } else {
