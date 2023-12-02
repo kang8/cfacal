@@ -13,9 +13,13 @@ import { mergeIcsFiles } from './merge-ics.ts'
         ? new Date(Date.parse(Deno.args[1]))
         : getFirstDayOfNextMonth()
 
-      // TODO: current month or next month
-      // await fetchJsonAndConvertToCsv(date)
-      await fetchJsonAndConvertToCsv(date)
+      if (Deno.args[1]) {
+        await fetchJsonAndConvertToCsv(new Date(Date.parse(Deno.args[1]))) // specified month
+      } else {
+        await fetchJsonAndConvertToCsv(new Date()) // current month
+        await fetchJsonAndConvertToCsv(getFirstDayOfNextMonth()) // next month
+      }
+
       break
     }
 
