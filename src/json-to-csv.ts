@@ -134,7 +134,9 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     } else if (diffOutputs[0].includes('a')) { // adds
       patch = diffOutputs.join('\n')
     } else {
-      console.info(`[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`)
+      console.info(
+        `[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`,
+      )
     }
 
     Deno.writeTextFile(patchFileName, patch)
@@ -165,7 +167,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     }
 
     if (movies.length <= 0) {
-      console.log(`No data Fetch in ${dateFormat(firstDayOfMonth, 'yyyy-MM')}.`);
+      console.log(`No data Fetch in ${dateFormat(firstDayOfMonth, 'yyyy-MM')}.`)
 
       return
     }
