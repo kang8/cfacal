@@ -134,8 +134,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     } else if (diffOutputs[0].includes('a')) { // adds
       patch = diffOutputs.join('\n')
     } else {
-      // TODO: change to '2023-11, without any change'
-      console.info('Without any change!!!')
+      console.info(`[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`)
     }
 
     Deno.writeTextFile(patchFileName, patch)
