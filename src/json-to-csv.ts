@@ -78,7 +78,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
 
   const filePath = `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`
 
-  try {
+  try { // is file exist
     await Deno.lstat(filePath)
 
     Deno.writeTextFile(
@@ -163,6 +163,12 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error
+    }
+
+    if (movies.length <= 0) {
+      console.log(`No data Fetch in ${dateFormat(firstDayOfMonth, 'yyyy-MM')}.`);
+
+      return
     }
 
     Deno.writeTextFile(
