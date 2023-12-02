@@ -51,7 +51,10 @@ export function formatJson(json: Body): Array<Movie> {
 
 export function sortByPlayTime(movies: Movie[]) {
   movies.sort((a, b) => {
-    return new Date(a.playTime).getTime() - new Date(b.playTime).getTime()
+    if (a.playTime !== b.playTime) {
+      return a.playTime.localeCompare(b.playTime)
+    }
+    return a.endTime.localeCompare(b.endTime)
   })
 }
 
