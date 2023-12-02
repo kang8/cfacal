@@ -1,0 +1,31 @@
+name: Deno
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - uses: actions/cache@v3
+        name: Setup deno cache
+        with:
+          path: |
+            ~/.deno
+            ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
+
+      - name: Run linter
+        run: deno task lint
+
+      - name: Run format
+        run: deno task format
+
+      - name: Run tests
+        run: deno task test
