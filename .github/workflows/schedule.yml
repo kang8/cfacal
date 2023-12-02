@@ -1,0 +1,57 @@
+name: Daily Run
+
+on:
+  schedule:
+    - cron: '0 7 21-31 * *'
+    - cron: '0 7 1-20 * 2,4'
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: 'Asia/Shanghai'
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - uses: actions/cache@v3
+        name: Setup deno cache
+        with:
+          path: |
+            ~/.deno
+            ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
+
+      - name: Fetch
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch
+          deno task dev fetch
+
+          if [[ -n $(git status --porcelain) ]]; then
+            # Conver and Merge
+            deno task dev convert all
+            deno task dev merge
+
+            # Commit
+            git config push.autoSetupRemote true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git checkout -b routine/$(date -u +%Y-%m)--$RANDOM
+            git add .
+            git commit --message="chore(data): Routine update"
+            git push
+
+            # Create pull request
+            gh pr create --base master --title 'Routine update' --body 'Created by Github action'
+          else
+            echo "Have not file change."
+          fi
