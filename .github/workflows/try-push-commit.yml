@@ -1,0 +1,31 @@
+name: Try push commit
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create report file
+        run: date +%s > report.txt
+
+      - name: Commit report
+        run: |
+          git config push.autoSetupRemote true
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout -b routine/2023-12
+          git add .
+          git commit --message="Add report"
+          git push
+
+      - name: create pull request
+        run: gh pr create --base master --title 'Routine 2023-12' --body 'Created by Github action'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
