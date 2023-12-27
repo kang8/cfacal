@@ -43,10 +43,12 @@ jobs:
 
             # Commit
             git config push.autoSetupRemote true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
             git checkout -b routine/$(date -u +%Y-%m)--$RANDOM
-            git commit --all --message="chore(data): Routine update"
+
+            git add .
+            git commit --message="chore(data): Routine update"
             git push
 
             # Create pull request
