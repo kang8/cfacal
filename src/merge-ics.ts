@@ -18,12 +18,11 @@ export async function mergeIcsFiles() {
   let header = ''
   let footer = ''
 
-  const nextMonth = new Date(Date.now())
-  nextMonth.setMonth(nextMonth.getMonth() + 1)
+  const monthAfterNext = new Date(Date.now())
+  monthAfterNext.setMonth(monthAfterNext.getMonth() + 2)
   for (
     const event = new Date(Date.parse('2023-05'));
-    // event <= new Date(Date.parse('2023-05'));
-    event <= nextMonth;
+    event <= monthAfterNext;
     event.setMonth(event.getMonth() + 1)
   ) {
     try {
