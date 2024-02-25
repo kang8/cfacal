@@ -37,7 +37,7 @@ jobs:
           deno task dev fetch
 
           if [[ -n $(git status --porcelain) ]]; then
-            # Conver and Merge
+            # Convert and Merge
             deno task dev convert all
             deno task dev merge
 
