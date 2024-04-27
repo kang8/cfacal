@@ -24,12 +24,22 @@ export function parseTitle(movie: Movie): string {
   return `${movie.cinima}|${movie.name}(${movie.englishName})`
 }
 
-export function parseDirector(movie: Movie): string {
+export function parseDescription(movie: Movie): string {
+  let description = ''
+
   if (movie?.director) {
-    return `导演: ${movie.director}`
+    description += `导演: ${movie.director}\n`
   }
 
-  return 'TBD'
+  if (movie?.year) {
+    description += `年份: ${movie.year}`
+  }
+
+  if (description.trim() === '') {
+    return 'TBD'
+  }
+
+  return description
 }
 
 export async function csvToIcs(filenames: string[]) {
@@ -58,7 +68,7 @@ export async function csvToIcs(filenames: string[]) {
             start: parseDate(new Date(movie.playTime)),
             end: parseDate(new Date(movie.endTime)),
             title: parseTitle(movie),
-            description: parseDirector(movie),
+            description: parseDescription(movie),
           }
         })
       ),
