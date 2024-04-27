@@ -41,9 +41,11 @@ export function parseCinema(
 }
 
 function parseDirector(movieActors: Array<movieActor>): string {
-  return movieActors.filter(actor => actor.position === '导演').map(actor => actor.realName).join('/')
+  return movieActors
+    .filter((actor) => actor.position === '导演')
+    .map((actor) => actor.realName)
+    .join('/')
 }
-
 
 export function formatJson(json: Body): Array<Movie> {
   return json.data.records.map<Movie>((record) => ({

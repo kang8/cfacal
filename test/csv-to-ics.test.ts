@@ -22,6 +22,7 @@ Deno.test('Parse title', async (t) => {
     name: '弗兰兹',
     playTime: '2023-05-07 19:00:00',
     year: 2016,
+    director: '弗朗索瓦·欧容',
   }, {
     cinima: '百子湾',
     endTime: '2023-05-07 18:09:00',
@@ -29,6 +30,7 @@ Deno.test('Parse title', async (t) => {
     name: '黑猫白猫',
     playTime: '2023-05-07 16:00:00',
     year: 1998,
+    director: '埃米尔·库斯图里卡 Emir Kusturiča',
   }]
 
   const titles = movies.map(parseTitle)

@@ -87,6 +87,7 @@ Deno.test('Sort movies by play time', () => {
       name: '坂本龙一：终曲',
       playTime: '2023-05-07 19:00:00',
       year: 2017,
+      director: '史蒂芬·野村·斯奇博',
     },
     {
       cinima: '百子湾',
@@ -95,6 +96,7 @@ Deno.test('Sort movies by play time', () => {
       name: '牛奶配送员的奇幻人生',
       playTime: '2023-05-07 13:30:00',
       year: 2016,
+      director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
     {
       cinima: '百子湾',
@@ -103,6 +105,7 @@ Deno.test('Sort movies by play time', () => {
       name: '黑猫白猫',
       playTime: '2023-05-07 16:00:00',
       year: 1998,
+      director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
   ]
 
@@ -122,6 +125,7 @@ Deno.test('convert movies to csv', async (t) => {
       name: '坂本龙一：终曲',
       playTime: '2023-05-07 19:00:00',
       year: 2017,
+      director: '史蒂芬·野村·斯奇博',
     },
     {
       cinima: '百子湾',
@@ -130,6 +134,7 @@ Deno.test('convert movies to csv', async (t) => {
       name: '牛奶配送员的奇幻人生',
       playTime: '2023-05-07 13:30:00',
       year: 2016,
+      director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
     {
       cinima: '百子湾',
@@ -138,6 +143,7 @@ Deno.test('convert movies to csv', async (t) => {
       name: '黑猫白猫',
       playTime: '2023-05-07 16:00:00',
       year: 1998,
+      director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
   ]
 

@@ -25,7 +25,7 @@ export type Body = {
         englishName: string
         movieTime: string
         movieActors: Array<movieActor>
-      },
+      }
       cinemaInfo: CinemaInfo
       movieHall: MovieHall
       playTime: string

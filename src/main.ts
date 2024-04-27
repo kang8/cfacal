@@ -14,7 +14,9 @@ import { mergeIcsFiles } from './merge-ics.ts'
       } else {
         await fetchJsonAndConvertToCsv(new Date()) // current month
         await fetchJsonAndConvertToCsv(getFirstDayOfNextMonth()) // next month
-        await fetchJsonAndConvertToCsv(getFirstDayOfNextMonth(getFirstDayOfNextMonth())) // the month after next
+        await fetchJsonAndConvertToCsv(
+          getFirstDayOfNextMonth(getFirstDayOfNextMonth()),
+        ) // the month after next
       }
 
       break
