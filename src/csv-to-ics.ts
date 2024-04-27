@@ -24,6 +24,14 @@ export function parseTitle(movie: Movie): string {
   return `${movie.cinima}|${movie.name}(${movie.englishName})`
 }
 
+export function parseDirector(movie: Movie): string {
+  if (movie?.director) {
+    return `导演: ${movie.director}`
+  }
+
+  return 'TBD'
+}
+
 export async function csvToIcs(filenames: string[]) {
   for await (const filename of filenames) {
     const movies: Movie[] = []
@@ -50,7 +58,7 @@ export async function csvToIcs(filenames: string[]) {
             start: parseDate(new Date(movie.playTime)),
             end: parseDate(new Date(movie.endTime)),
             title: parseTitle(movie),
-            description: 'TBD',
+            description: parseDirector(movie),
           }
         })
       ),

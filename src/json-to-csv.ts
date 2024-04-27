@@ -2,6 +2,7 @@ import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod
 import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
 import { csvDir } from './csv-to-ics.ts'
+import { movieActor } from './types.ts'
 
 const cfaApi = 'https://yt5.cfa.org.cn/api/libraryapi/arrangementPage'
 const patchFileName = 'diff.patch'
@@ -9,6 +10,7 @@ export const csvHeader = [
   'name',
   'englishName',
   'year',
+  'director',
   'cinima',
   'playTime',
   'endTime',
@@ -38,11 +40,17 @@ export function parseCinema(
   throw new Error(`Do not support cinema: [${cinemaInfo}].`)
 }
 
+function parseDirector(movieActors: Array<movieActor>): string {
+  return movieActors.filter(actor => actor.position === '导演').map(actor => actor.realName).join('/')
+}
+
+
 export function formatJson(json: Body): Array<Movie> {
   return json.data.records.map<Movie>((record) => ({
     name: record.movieInfo.movieName,
     englishName: record.movieInfo.englishName,
     year: parseInt(record.movieInfo.movieTime),
+    director: parseDirector(record.movieInfo.movieActors),
     cinima: parseCinema(record.cinemaInfo, record.movieHall),
     playTime: record.playTime,
     endTime: record.endTime,
