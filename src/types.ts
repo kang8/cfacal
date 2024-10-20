@@ -8,7 +8,7 @@ export type Movie = {
   endTime: string
 }
 
-export type CinemaInfo = '小西天艺术影院' | '百子湾艺术影院'
+export type CinemaInfo = '小西天艺术影院' | '百子湾艺术影院' | '江南分馆影院'
 
 export type MovieHall = '1号厅' | '2号厅'
 
@@ -24,12 +24,11 @@ export type Body = {
         movieName: string
         englishName: string
         movieTime: string
-        movieActors: Array<movieActor>
+        movieMinute: number
       }
       cinemaInfo: CinemaInfo
       movieHall: MovieHall
       playTime: string
-      endTime: string
     }]
   }
   total: string
