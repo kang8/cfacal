@@ -82,7 +82,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     nextDay.setDate(nextDay.getDate() + 1)
   ) {
     url.search = new URLSearchParams({
-      yesr: dateFormat(nextDay, 'yyyy'),
+      year: dateFormat(nextDay, 'yyyy'),
       month: dateFormat(nextDay, 'MM'),
       day: dateFormat(nextDay, 'dd'),
     }).toString()
