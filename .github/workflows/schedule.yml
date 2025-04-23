@@ -3,8 +3,7 @@ name: Schedule Run
 on:
   workflow_dispatch: # allow manual triggering
   schedule:
-    - cron: '0 7 21-31 * *'  # At 07:00(UTC is 15:00 in Beijing) on every day-of-month from 21 through 31.
-    - cron: '0 7 1-20 * 2,4' # At 07:00(UTC is 15:00 in Beijing) on Tuesday and Thursday.
+    - cron: '0 7 * * *'  # At 07:00(UTC is 15:00 in Beijing) on every day
 
 jobs:
   schedule:
