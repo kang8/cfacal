@@ -28,4 +28,6 @@ jobs:
         run: deno task format
 
       - name: Run tests
+        env:
+          STATIC_KEY: ${{ secrets.STATIC_KEY }}
         run: deno task test

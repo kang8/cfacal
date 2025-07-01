@@ -32,6 +32,7 @@ jobs:
       - name: Fetch then convert and merge
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            STATIC_KEY: ${{ secrets.STATIC_KEY }}
         run: |
           # Fetch
           deno task dev fetch
