@@ -1,9 +1,18 @@
 import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
 import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
+import { crypto } from 'https://deno.land/std@0.224.0/crypto/mod.ts'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
 import { csvDir } from './csv-to-ics.ts'
 
-const cfaApi = 'https://web.guoyingjiaying.cn/filmcinema/arrangementPage'
+import 'jsr:@std/dotenv/load'
+
+const cfaApi = 'https://api.guoyingjiaying.cn/api/web/arrangementPage'
+const staticKey = Deno.env.get('STATIC_KEY')
+
+if (!staticKey) {
+  throw new Error('static key not set!')
+}
+
 const patchFileName = 'diff.patch'
 export const csvHeader = [
   'name',
@@ -74,20 +83,36 @@ export function sortByPlayTime(movies: Movie[]) {
 
 export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   const movies: Array<Movie> = []
-  const url: URL = new URL(cfaApi)
 
   for (
     const nextDay = new Date(firstDayOfMonth);
     firstDayOfMonth.getMonth() === nextDay.getMonth();
     nextDay.setDate(nextDay.getDate() + 1)
   ) {
-    url.search = new URLSearchParams({
-      year: dateFormat(nextDay, 'yyyy'),
-      month: dateFormat(nextDay, 'MM'),
-      day: dateFormat(nextDay, 'dd'),
-    }).toString()
+    const year = dateFormat(nextDay, 'yyyy')
+    const month = dateFormat(nextDay, 'MM')
+    const day = dateFormat(nextDay, 'dd')
+    const unixTimestamp = Math.floor(Date.now() / 1000)
 
-    const res = await fetch(url)
+    const msgUint8 = new TextEncoder().encode(`${year}${month}${day}${unixTimestamp}${staticKey}`)
+    const hashBuffer = await crypto.subtle.digest('MD5', msgUint8)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const signer = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+
+    const res = await fetch(cfaApi, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        year,
+        month,
+        day,
+        t: unixTimestamp.toString(),
+        signer,
+      }).toString(),
+    })
+
     const json = await res.json() as Body
 
     movies.push(...formatJson(json))
