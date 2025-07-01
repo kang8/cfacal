@@ -1,6 +1,6 @@
 import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
 import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
-import { crypto } from 'https://deno.land/std@0.224.0/crypto/mod.ts'
+import { crypto } from 'https://deno.land/std@0.184.0/crypto/mod.ts'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
 import { csvDir } from './csv-to-ics.ts'
 
