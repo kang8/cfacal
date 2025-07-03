@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --allow-read --allow-write --allow-net --allow-run src/main.ts",
+    "dev": "deno run --allow-read --allow-write --allow-net --allow-run --allow-env=NODE_ENV src/main.ts",
     "test": "deno test --allow-read --allow-env",
     "test:rebase": "deno test --allow-read --allow-write -- -u",
     "format": "deno fmt",
