@@ -1,17 +1,12 @@
 import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
 import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
-import { crypto } from 'https://deno.land/std@0.184.0/crypto/mod.ts'
+import { crypto } from 'https://deno.land/std@0.208.0/crypto/mod.ts'
+import { encodeHex } from 'https://deno.land/std@0.208.0/encoding/hex.ts'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
 import { csvDir } from './csv-to-ics.ts'
 
-import 'jsr:@std/dotenv/load'
-
 const cfaApi = 'https://api.guoyingjiaying.cn/api/web/arrangementPage'
-const staticKey = Deno.env.get('STATIC_KEY')
-
-if (!staticKey) {
-  throw new Error('static key not set!')
-}
+const keyApi = 'https://api.guoyingjiaying.cn/api/web/getkey'
 
 const patchFileName = 'diff.patch'
 export const csvHeader = [
@@ -23,6 +18,32 @@ export const csvHeader = [
   'playTime',
   'endTime',
 ]
+
+async function md5(text: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(text)
+  const hashBuffer = await crypto.subtle.digest('MD5', msgUint8)
+  return encodeHex(new Uint8Array(hashBuffer))
+}
+
+async function getApiKey(unixTimestamp: number): Promise<string> {
+  const keyResponse = await fetch(keyApi, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      t: unixTimestamp.toString(),
+    }),
+  })
+
+  const keyData = await keyResponse.json()
+
+  if (keyData.code !== 200) {
+    throw new Error('Failed to get key')
+  }
+
+  return keyData.data.token
+}
 
 export function getFirstDayOfNextMonth(date: Date = new Date()): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
@@ -92,12 +113,11 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     const year = dateFormat(nextDay, 'yyyy')
     const month = dateFormat(nextDay, 'MM')
     const day = dateFormat(nextDay, 'dd')
-    const unixTimestamp = Math.floor(Date.now() / 1000)
+    const unixTimestamp = Date.now()
 
-    const msgUint8 = new TextEncoder().encode(`${year}${month}${day}${unixTimestamp}${staticKey}`)
-    const hashBuffer = await crypto.subtle.digest('MD5', msgUint8)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    const signer = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    const key = await getApiKey(unixTimestamp)
+
+    const signer = await md5(`${year}${month}${day}${unixTimestamp}${key}`)
 
     const res = await fetch(cfaApi, {
       method: 'POST',
