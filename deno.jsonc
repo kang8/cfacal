@@ -13,7 +13,10 @@
     "include": [
       "src/",
       "test/"
-    ]
+    ],
+    "rules": {
+      "exclude": ["no-import-prefix"]
+    }
   },
   "fmt": {
     "semiColons": false,
