@@ -1,6 +1,7 @@
 import {
   csvHeader,
   formatJson,
+  generatePatchFromDiff,
   getFirstDayOfNextMonth,
   parseCinema,
   sortByPlayTime,
@@ -149,4 +150,97 @@ Deno.test('convert movies to csv', async (t) => {
   })
 
   await assertSnapshot(t, csvStr)
+})
+
+Deno.test('Generate patch from diff - delete operation', () => {
+  const diffOutput = `2,3d1
+< line to delete 1
+< line to delete 2
+---
+> remaining line 1
+> remaining line 2`
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  const expected = `---
+> remaining line 1
+> remaining line 2`
+
+  assertEquals(patch, expected)
+})
+
+Deno.test('Generate patch from diff - change operation', () => {
+  const diffOutput = `1,3c1,2
+< old line 1
+< old line 2
+< old line 3
+---
+> new line 1
+> new line 2`
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  // The function removes deleteLine (which is 1 in this case) from position 1
+  // oldTo - oldFrom + 1 - changeLine = 3 - 1 + 1 - 2 = 1
+  const expected = `2,3c1,2
+< old line 2
+< old line 3
+---
+> new line 1
+> new line 2`
+
+  assertEquals(patch, expected)
+})
+
+Deno.test('Generate patch from diff - change operation with single line', () => {
+  const diffOutput = `5c3
+< old single line
+---
+> new single line`
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  // For single line: oldFrom=5, oldTo=5, newFrom=3, newTo=3
+  // changeLine = 3-3+1 = 1
+  // deleteLine = 5-5+1-1 = 0
+  // So it splices 0 lines from position 1, and rewrites line 0
+  // Result: 5,5c3,3 (which is "5c3" in shorthand)
+  const expected = `5,5c3,3
+< old single line
+---
+> new single line`
+
+  assertEquals(patch, expected)
+})
+
+Deno.test('Generate patch from diff - add operation', () => {
+  const diffOutput = `0a1,2
+> new line 1
+> new line 2`
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  const expected = `0a1,2
+> new line 1
+> new line 2`
+
+  assertEquals(patch, expected)
+})
+
+Deno.test('Generate patch from diff - no changes', () => {
+  const diffOutput = ''
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  assertEquals(patch, '')
+})
+
+Deno.test('Generate patch from diff - unrecognized format', () => {
+  const diffOutput = 'hello there'
+
+  const patch = generatePatchFromDiff(diffOutput)
+
+  // When there's no recognized operation (d, c, or a), the function returns empty string
+  // because patch variable is initialized to '' and never set
+  assertEquals(patch, '')
 })
