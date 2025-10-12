@@ -3,7 +3,8 @@
   "extends": [
     "config:recommended",
     ":pinAllExceptPeerDependencies",
-    "group:allNonMajor"
+    "group:allNonMajor",
+    "github>Omochice/renovate-config:deno"
   ],
   "timezone": "Asia/Shanghai",
   "rangeStrategy": "pin",
