@@ -1,7 +1,7 @@
-import { parse as csvParse } from 'https://deno.land/std@0.184.0/csv/parse.ts'
+import { parse as csvParse } from 'jsr:@std/csv@1'
 import { Movie } from '../src/types.ts'
 import { parseTitle } from '../src/csv-to-ics.ts'
-import { assertSnapshot } from 'https://deno.land/std@0.185.0/testing/snapshot.ts'
+import { assertSnapshot } from 'jsr:@std/testing@1/snapshot'
 
 Deno.test('CSV parse', async (t) => {
   const content = await Deno.readTextFile('test/fixtures/test.csv')

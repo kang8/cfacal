@@ -1,4 +1,4 @@
-import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
+import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 
 export const icsDir = './assets/ics'
 
