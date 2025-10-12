@@ -1,6 +1,6 @@
 import { createEvents, DateArray, EventAttributes } from 'npm:ics@^3.5.0'
-import { encodeHex } from 'https://deno.land/std@0.202.0/encoding/hex.ts'
-import { parse as csvParse } from 'https://deno.land/std@0.184.0/csv/parse.ts'
+import { encodeHex } from 'https://deno.land/std@0.224.0/encoding/hex.ts'
+import { parse as csvParse } from 'https://deno.land/std@0.224.0/csv/parse.ts'
 import { Movie } from './types.ts'
 import { sortByPlayTime } from './json-to-csv.ts'
 
