@@ -195,7 +195,9 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       }),
     )
 
-    console.info(`Comparing changes for [${dateFormat(firstDayOfMonth, 'yyyy-MM')}]`)
+    console.info(
+      `Comparing changes for [${dateFormat(firstDayOfMonth, 'yyyy-MM')}]`,
+    )
 
     const diffCommand = new Deno.Command('diff', {
       args: [
