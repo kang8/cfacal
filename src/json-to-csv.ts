@@ -1,7 +1,7 @@
-import { format as dateFormat } from 'https://deno.land/std@0.224.0/datetime/mod.ts'
-import { stringify as csvStringify } from 'https://deno.land/std@0.224.0/csv/stringify.ts'
-import { crypto } from 'https://deno.land/std@0.224.0/crypto/mod.ts'
-import { encodeHex } from 'https://deno.land/std@0.224.0/encoding/hex.ts'
+import { format as dateFormat } from 'jsr:@std/datetime@0.225'
+import { stringify as csvStringify } from 'jsr:@std/csv@1'
+import { crypto } from 'jsr:@std/crypto@1'
+import { encodeHex } from 'jsr:@std/encoding@1/hex'
 import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
 import { csvDir } from './csv-to-ics.ts'
 

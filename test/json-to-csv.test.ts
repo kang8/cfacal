@@ -5,13 +5,10 @@ import {
   parseCinema,
   sortByPlayTime,
 } from '../src/json-to-csv.ts'
-import { format as dateFormat } from 'https://deno.land/std@0.184.0/datetime/mod.ts'
-import { stringify as csvStringify } from 'https://deno.land/std@0.184.0/csv/stringify.ts'
-import {
-  assertEquals,
-  assertThrows,
-} from 'https://deno.land/std@0.184.0/testing/asserts.ts'
-import { assertSnapshot } from 'https://deno.land/std@0.185.0/testing/snapshot.ts'
+import { format as dateFormat } from 'jsr:@std/datetime@0.225'
+import { stringify as csvStringify } from 'jsr:@std/csv@1'
+import { assertEquals, assertThrows } from 'jsr:@std/assert@1'
+import { assertSnapshot } from 'jsr:@std/testing@1/snapshot'
 import { Body, CinemaInfo, Movie } from '../src/types.ts'
 
 Deno.test('Get first day of next month', () => {
