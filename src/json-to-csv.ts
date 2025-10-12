@@ -102,6 +102,49 @@ export function sortByPlayTime(movies: Movie[]) {
   })
 }
 
+/**
+ * Generate a patch string from diff command output
+ * @param diffOutput - Raw output from the diff command
+ * @returns Processed patch string ready for the patch command
+ */
+export function generatePatchFromDiff(diffOutput: string): string {
+  const diffOutputs = diffOutput.split('\n')
+
+  let patch = ''
+
+  if (diffOutputs[0].includes('d')) { // delete
+    const range = diffOutputs[0].split('d')[0].split(',')
+    const from = parseInt(range[0])
+    const to = parseInt(range[1])
+
+    const deleteLine = to - from + 1 // add from itself
+
+    diffOutputs.splice(0, deleteLine + 1) // delete from 0 index
+
+    patch = diffOutputs.join('\n')
+  } else if (diffOutputs[0].includes('c')) { // changes
+    const [oldRange, newRange] = diffOutputs[0].split('c')
+
+    const oldFrom = parseInt(oldRange.split(',')[0])
+    const oldTo = parseInt(oldRange.split(',')[1] ?? oldFrom)
+
+    const newFrom = parseInt(newRange.split(',')[0])
+    const newTo = parseInt(newRange.split(',')[1] ?? newFrom)
+
+    const changeLine = newTo - newFrom + 1 // add newFrom itself
+    const deleteLine = oldTo - oldFrom + 1 - changeLine // add oldFrom itself and subtract changeLine
+
+    diffOutputs.splice(1, deleteLine)
+    diffOutputs[0] = `${oldTo - changeLine + 1},${oldTo}c${newFrom},${newTo}`
+
+    patch = diffOutputs.join('\n')
+  } else if (diffOutputs[0].includes('a')) { // adds
+    patch = diffOutputs.join('\n')
+  }
+
+  return patch
+}
+
 export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   const movies: Array<Movie> = []
 
@@ -152,7 +195,8 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       }),
     )
 
-    // diff
+    console.info(`Comparing changes for [${dateFormat(firstDayOfMonth, 'yyyy-MM')}]`)
+
     const diffCommand = new Deno.Command('diff', {
       args: [
         filePath,
@@ -163,41 +207,11 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     const { stdout } = await diffCommand.output()
     const diffOutput = new TextDecoder().decode(stdout)
 
-    console.log(diffOutput) // always output diff message for debugging
+    console.log(diffOutput) // Output diff result for debugging and change tracking
 
-    const diffOutputs = diffOutput.split('\n')
+    const patch = generatePatchFromDiff(diffOutput)
 
-    let patch = ''
-
-    if (diffOutputs[0].includes('d')) { // delete
-      const range = diffOutputs[0].split('d')[0].split(',')
-      const from = parseInt(range[0])
-      const to = parseInt(range[1])
-
-      const deleteLine = to - from + 1 // add from itself
-
-      diffOutputs.splice(0, deleteLine + 1) // delete from 0 index
-
-      patch = diffOutputs.join('\n')
-    } else if (diffOutputs[0].includes('c')) { // changes
-      const [oldRange, newRange] = diffOutputs[0].split('c')
-
-      const oldFrom = parseInt(oldRange.split(',')[0])
-      const oldTo = parseInt(oldRange.split(',')[1])
-
-      const newFrom = parseInt(newRange.split(',')[0])
-      const newTo = parseInt(newRange.split(',')[1] ?? newFrom)
-
-      const changeLine = newTo - newFrom + 1 // add newFrom itself
-      const deleteLine = oldTo - oldFrom + 1 - changeLine // add oldFrom itself and subtract changeLine
-
-      diffOutputs.splice(1, deleteLine)
-      diffOutputs[0] = `${oldTo - changeLine + 1},${oldTo}c${newFrom},${newTo}`
-
-      patch = diffOutputs.join('\n')
-    } else if (diffOutputs[0].includes('a')) { // adds
-      patch = diffOutputs.join('\n')
-    } else {
+    if (!patch) {
       console.info(
         `[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`,
       )
@@ -223,8 +237,8 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
 
     await child.stdin.close()
 
-    Deno.remove(patchFileName)
-    Deno.remove(filePath + '.new')
+    // Deno.remove(patchFileName)
+    // Deno.remove(filePath + '.new')
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error
