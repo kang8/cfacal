@@ -79,7 +79,7 @@ Deno.test('Parse cinema', () => {
 Deno.test('Sort movies by play time', () => {
   const movies: Movie[] = [
     {
-      cinima: '小西天',
+      cinema: '小西天',
       endTime: '2023-05-07 20:40:00',
       englishName: 'Ryuichi Sakamoto: CODA',
       name: '坂本龙一：终曲',
@@ -88,7 +88,7 @@ Deno.test('Sort movies by play time', () => {
       director: '史蒂芬·野村·斯奇博',
     },
     {
-      cinima: '百子湾',
+      cinema: '百子湾',
       endTime: '2023-05-07 15:35:00',
       englishName: 'On the Milky Road',
       name: '牛奶配送员的奇幻人生',
@@ -97,7 +97,7 @@ Deno.test('Sort movies by play time', () => {
       director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
     {
-      cinima: '百子湾',
+      cinema: '百子湾',
       endTime: '2023-05-07 18:09:00',
       englishName: 'Black Cat, White Cat',
       name: '黑猫白猫',
@@ -117,7 +117,7 @@ Deno.test('Sort movies by play time', () => {
 Deno.test('convert movies to csv', async (t) => {
   const movies: Movie[] = [
     {
-      cinima: '小西天',
+      cinema: '小西天',
       endTime: '2023-05-07 20:40:00',
       englishName: 'Ryuichi Sakamoto: CODA',
       name: '坂本龙一：终曲',
@@ -126,7 +126,7 @@ Deno.test('convert movies to csv', async (t) => {
       director: '史蒂芬·野村·斯奇博',
     },
     {
-      cinima: '百子湾',
+      cinema: '百子湾',
       endTime: '2023-05-07 15:35:00',
       englishName: 'On the Milky Road',
       name: '牛奶配送员的奇幻人生',
@@ -135,7 +135,7 @@ Deno.test('convert movies to csv', async (t) => {
       director: '埃米尔·库斯图里卡 Emir Kusturiča',
     },
     {
-      cinima: '百子湾',
+      cinema: '百子湾',
       endTime: '2023-05-07 18:09:00',
       englishName: 'Black Cat, White Cat',
       name: '黑猫白猫',

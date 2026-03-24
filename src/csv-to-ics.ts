@@ -18,10 +18,10 @@ function parseDate(date: Date): DateArray {
 
 export function parseTitle(movie: Movie): string {
   if (movie.englishName.trim() === '') {
-    return `${movie.cinima}|${movie.name}`
+    return `${movie.cinema}|${movie.name}`
   }
 
-  return `${movie.cinima}|${movie.name}(${movie.englishName})`
+  return `${movie.cinema}|${movie.name}(${movie.englishName})`
 }
 
 export function parseDescription(movie: Movie): string {

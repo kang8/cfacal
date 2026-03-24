@@ -3,7 +3,7 @@ export type Movie = {
   englishName: string
   year: number
   director: string
-  cinima: string
+  cinema: string
   playTime: string
   endTime: string
 }

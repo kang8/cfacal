@@ -16,7 +16,7 @@ Deno.test('CSV parse', async (t) => {
 
 Deno.test('Parse title', async (t) => {
   const movies: Movie[] = [{
-    cinima: '小西天',
+    cinema: '小西天',
     endTime: '2023-05-07 20:40:00',
     englishName: '',
     name: '弗兰兹',
@@ -24,7 +24,7 @@ Deno.test('Parse title', async (t) => {
     year: 2016,
     director: '弗朗索瓦·欧容',
   }, {
-    cinima: '百子湾',
+    cinema: '百子湾',
     endTime: '2023-05-07 18:09:00',
     englishName: 'Black Cat, White Cat',
     name: '黑猫白猫',

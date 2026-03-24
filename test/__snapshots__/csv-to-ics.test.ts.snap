@@ -3,7 +3,7 @@ export const snapshot = {};
 snapshot[`CSV parse 1`] = `
 [
   {
-    cinima: "小西天",
+    cinema: "小西天",
     endTime: "2023-05-20 12:57:00",
     englishName: "Love Letter",
     name: "情书",
@@ -11,7 +11,7 @@ snapshot[`CSV parse 1`] = `
     year: "1995",
   },
   {
-    cinima: "百子湾",
+    cinema: "百子湾",
     endTime: "2023-05-20 15:23:00",
     englishName: "",
     name: "弗兰兹",

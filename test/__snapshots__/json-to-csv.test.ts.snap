@@ -39,7 +39,7 @@ snapshot[`Iterate through all days of the next month 1`] = `
 snapshot[`Format json 1`] = `
 [
   {
-    cinima: "小西天",
+    cinema: "小西天",
     director: "",
     endTime: "2023-05-07 13:30:00",
     englishName: "What Do We See When We Look at the Sky?",
@@ -48,7 +48,7 @@ snapshot[`Format json 1`] = `
     year: 2021,
   },
   {
-    cinima: "小西天",
+    cinema: "小西天",
     director: "",
     endTime: "2023-05-07 16:02:00",
     englishName: "Proxima",
@@ -57,7 +57,7 @@ snapshot[`Format json 1`] = `
     year: 2019,
   },
   {
-    cinima: "小西天(2)",
+    cinema: "小西天(2)",
     director: "",
     endTime: "2023-05-07 18:05:00",
     englishName: "Ryuichi Sakamoto: Async at The Park Avenue Armory",
@@ -66,7 +66,7 @@ snapshot[`Format json 1`] = `
     year: 2018,
   },
   {
-    cinima: "小西天",
+    cinema: "小西天",
     director: "",
     endTime: "2023-05-07 20:40:00",
     englishName: "Ryuichi Sakamoto: CODA",
@@ -75,7 +75,7 @@ snapshot[`Format json 1`] = `
     year: 2017,
   },
   {
-    cinima: "百子湾",
+    cinema: "百子湾",
     director: "",
     endTime: "2023-05-07 15:35:00",
     englishName: "On the Milky Road",
@@ -84,7 +84,7 @@ snapshot[`Format json 1`] = `
     year: 2016,
   },
   {
-    cinima: "百子湾",
+    cinema: "百子湾",
     director: "",
     endTime: "2023-05-07 18:09:00",
     englishName: "Black Cat, White Cat",
@@ -93,7 +93,7 @@ snapshot[`Format json 1`] = `
     year: 1998,
   },
   {
-    cinima: "百子湾",
+    cinema: "百子湾",
     director: "",
     endTime: "2023-05-07 21:20:00",
     englishName: "Underground",
@@ -105,7 +105,7 @@ snapshot[`Format json 1`] = `
 `;
 
 snapshot[`convert movies to csv 1`] = `
-'name,englishName,year,director,cinima,playTime,endTime\\r
+'name,englishName,year,director,cinema,playTime,endTime\\r
 坂本龙一：终曲,Ryuichi Sakamoto: CODA,2017,史蒂芬·野村·斯奇博,小西天,2023-05-07 19:00:00,2023-05-07 20:40:00\\r
 牛奶配送员的奇幻人生,On the Milky Road,2016,埃米尔·库斯图里卡 Emir Kusturiča,百子湾,2023-05-07 13:30:00,2023-05-07 15:35:00\\r
 黑猫白猫,"Black Cat, White Cat",1998,埃米尔·库斯图里卡 Emir Kusturiča,百子湾,2023-05-07 16:00:00,2023-05-07 18:09:00\\r

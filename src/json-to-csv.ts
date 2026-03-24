@@ -14,7 +14,7 @@ export const csvHeader = [
   'englishName',
   'year',
   'director',
-  'cinima',
+  'cinema',
   'playTime',
   'endTime',
 ]
@@ -79,7 +79,7 @@ export function formatJson(json: Body): Array<Movie> {
       year: parseInt(record.movieInfo.movieTime),
       // TODO: To get director name from another api?
       director: '',
-      cinima: parseCinema(record.cinemaInfo, record.movieHall),
+      cinema: parseCinema(record.cinemaInfo, record.movieHall),
       playTime: record.playTime,
       endTime: dateFormat(
         new Date(
