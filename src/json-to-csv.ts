@@ -73,24 +73,23 @@ export function formatJson(json: Body): Array<Movie> {
   return json.data.records
     // TODO: parse jiangnan cinema, and speart beijing and jiangnan movie information
     .filter((record) => record.cinemaInfo !== '江南分馆影院')
-    .map<Movie>((record) => ({
-      name: record.movieInfo.movieName,
-      englishName: record.movieInfo.englishName,
-      year: parseInt(record.movieInfo.movieTime),
-      // TODO: To get director name from another api?
-      director: '',
-      cinema: parseCinema(record.cinemaInfo, record.movieHall),
-      playTime: record.playTime,
-      endTime: dateFormat(
-        new Date(
-          new Date(record.playTime).setMinutes(
-            new Date(record.playTime).getMinutes() +
-              record.movieInfo.movieMinute,
-          ),
-        ),
-        'yyyy-MM-dd HH:mm:ss',
-      ),
-    }))
+    .map<Movie>((record) => {
+      const playDate = new Date(record.playTime)
+      playDate.setMinutes(
+        playDate.getMinutes() + record.movieInfo.movieMinute,
+      )
+
+      return {
+        name: record.movieInfo.movieName,
+        englishName: record.movieInfo.englishName,
+        year: parseInt(record.movieInfo.movieTime),
+        // TODO: To get director name from another api?
+        director: '',
+        cinema: parseCinema(record.cinemaInfo, record.movieHall),
+        playTime: record.playTime,
+        endTime: dateFormat(playDate, 'yyyy-MM-dd HH:mm:ss'),
+      }
+    })
 }
 
 export function sortByPlayTime(movies: Movie[]) {
@@ -188,7 +187,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   try { // is file exist
     await Deno.lstat(filePath)
 
-    Deno.writeTextFile(
+    await Deno.writeTextFile(
       filePath + '.new',
       csvStringify(movies, {
         columns: csvHeader,
@@ -219,7 +218,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       )
     }
 
-    Deno.writeTextFile(patchFileName, patch)
+    await Deno.writeTextFile(patchFileName, patch)
 
     // followed by https://github.com/denoland/deno/blob/c213ad380f349dee1f65e6d9a9f7a8fa669b2af2/cli/tests/unit/command_test.ts#L206-L233
     // TODO: May be have a sort way: https://github.com/denoland/deno/blob/c213ad380f349dee1f65e6d9a9f7a8fa669b2af2/cli/tests/unit/command_test.ts#L56-L84
@@ -239,8 +238,8 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
 
     await child.stdin.close()
 
-    Deno.remove(patchFileName)
-    Deno.remove(filePath + '.new')
+    await Deno.remove(patchFileName)
+    await Deno.remove(filePath + '.new')
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error
@@ -252,7 +251,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       return
     }
 
-    Deno.writeTextFile(
+    await Deno.writeTextFile(
       filePath,
       csvStringify(movies, {
         columns: csvHeader,

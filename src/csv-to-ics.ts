@@ -43,7 +43,7 @@ export function parseDescription(movie: Movie): string {
 }
 
 export async function csvToIcs(filenames: string[]) {
-  for await (const filename of filenames) {
+  for (const filename of filenames) {
     const movies: Movie[] = []
     const content = await Deno.readTextFile(`${csvDir}/${filename}.csv`)
 
@@ -74,10 +74,9 @@ export async function csvToIcs(filenames: string[]) {
       ),
     )
 
-    createEvents(events, async (error: Error | undefined, value: string) => {
-      if (error) throw error
+    const { error, value } = createEvents(events)
+    if (error) throw error
 
-      await Deno.writeTextFile(`./assets/ics/${filename}.ics`, value)
-    })
+    await Deno.writeTextFile(`./assets/ics/${filename}.ics`, value!)
   }
 }
