@@ -3,6 +3,7 @@ import {
   fetchJsonAndConvertToCsv,
   getFirstDayOfNextMonth,
 } from './json-to-csv.ts'
+import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import { mergeIcsFiles } from './merge-ics.ts'
 ;(async () => {
   const action = Deno.args[0]
@@ -23,7 +24,7 @@ import { mergeIcsFiles } from './merge-ics.ts'
     }
 
     case 'convert': { // 'convert' or 'convert all'
-      const isConvertAll = Deno.args[1] === 'all' ? true : false
+      const isConvertAll = Deno.args[1] === 'all'
       const files: string[] = []
 
       if (isConvertAll) {
@@ -35,7 +36,7 @@ import { mergeIcsFiles } from './merge-ics.ts'
         }
       } else {
         const date = getFirstDayOfNextMonth()
-        files.push(`${date.getFullYear()}-${date.getMonth() + 1}`)
+        files.push(dateFormat(date, 'yyyy-MM'))
       }
 
       await csvToIcs(files)
