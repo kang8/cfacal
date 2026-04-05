@@ -10,11 +10,16 @@ export type Movie = {
 
 export type CinemaInfo = '小西天艺术影院' | '百子湾艺术影院' | '江南分馆影院'
 
-export type MovieHall = '1号厅' | '2号厅'
+export type MovieHall = '1号厅' | '2号厅' | '3号厅' | '4号厅'
 
 export type Body = {
+  status: number
+  code: number
+  msg: string
+  date: string
   data: {
-    records: [{
+    records: Array<{
+      movieId: string
       movieInfo: {
         movieName: string
         englishName: string
@@ -24,10 +29,21 @@ export type Body = {
       cinemaInfo: CinemaInfo
       movieHall: MovieHall
       playTime: string
-    }]
+    }>
   }
-  total: string
-  size: string
+}
+
+export type MovieInfoBody = {
+  status: number
+  code: number
+  msg: string
+  data: {
+    movieName: string
+    movieActors: Array<{
+      position: string
+      readName: string
+    }>
+  }
 }
 
 export function sortByPlayTime(movies: Movie[]) {

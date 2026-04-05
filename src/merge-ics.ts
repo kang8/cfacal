@@ -1,14 +1,35 @@
-import { icsDir, mergedIcsPath } from './config.ts'
+import {
+  icsDir,
+  mergedIcsBeijingPath,
+  mergedIcsPath,
+  mergedIcsShuzhouPath,
+} from './config.ts'
 
-function extractIcsContent(content: string): string {
-  const contents = content.split('\r\n')
+function extractVEvents(content: string): string[] {
+  const lines = content.split('\r\n')
+  const events: string[] = []
+  let current: string[] = []
+  let inEvent = false
 
-  return contents
-    .slice(
-      contents.indexOf('BEGIN:VEVENT'),
-      contents.lastIndexOf('END:VCALENDAR'),
-    )
-    .join('\n')
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') {
+      inEvent = true
+      current = [line]
+    } else if (line === 'END:VEVENT') {
+      current.push(line)
+      events.push(current.join('\n'))
+      inEvent = false
+    } else if (inEvent) {
+      current.push(line)
+    }
+  }
+
+  return events
+}
+
+function isShuzhouEvent(event: string): boolean {
+  const match = event.match(/SUMMARY:(.+)/)
+  return match !== null && match[1].startsWith('江南')
 }
 
 export async function mergeIcsFiles() {
@@ -20,9 +41,11 @@ export async function mergeIcsFiles() {
   }
   files.sort()
 
-  let finalIcs = ''
   let header = ''
   let footer = ''
+  const allEvents: string[] = []
+  const beijingEvents: string[] = []
+  const shuzhouEvents: string[] = []
 
   for (const file of files) {
     const icsContent = await Deno.readTextFile(`${icsDir}/${file}`)
@@ -33,8 +56,6 @@ export async function mergeIcsFiles() {
         icsContents.indexOf('BEGIN:VCALENDAR'),
         icsContents.indexOf('BEGIN:VEVENT'),
       ).join('\n')
-
-      finalIcs = header
     }
 
     if (footer === '') {
@@ -43,11 +64,25 @@ export async function mergeIcsFiles() {
       ).join('\n')
     }
 
-    const onlyContext = extractIcsContent(icsContent)
-    finalIcs += '\n' + onlyContext
+    const events = extractVEvents(icsContent)
+    for (const event of events) {
+      allEvents.push(event)
+      if (isShuzhouEvent(event)) {
+        shuzhouEvents.push(event)
+      } else {
+        beijingEvents.push(event)
+      }
+    }
   }
 
-  finalIcs += '\n' + footer
+  const outputs: [string[], string][] = [
+    [allEvents, mergedIcsPath],
+    [beijingEvents, mergedIcsBeijingPath],
+    [shuzhouEvents, mergedIcsShuzhouPath],
+  ]
 
-  await Deno.writeTextFile(mergedIcsPath, finalIcs)
+  for (const [events, path] of outputs) {
+    const ics = header + '\n' + events.join('\n') + '\n' + footer
+    await Deno.writeTextFile(path, ics)
+  }
 }

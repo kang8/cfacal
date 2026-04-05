@@ -1,3 +1,5 @@
 export const csvDir = './assets/csv'
 export const icsDir = './assets/ics'
 export const mergedIcsPath = './assets/event.ics'
+export const mergedIcsBeijingPath = './assets/event-beijing.ics'
+export const mergedIcsShuzhouPath = './assets/event-shuzhou.ics'

@@ -1,12 +1,20 @@
 import { format as dateFormat } from 'jsr:@std/datetime@0.225'
-import { stringify as csvStringify } from 'jsr:@std/csv@1'
+import { parse as csvParse, stringify as csvStringify } from 'jsr:@std/csv@1'
 import { crypto } from 'jsr:@std/crypto@1'
 import { encodeHex } from 'jsr:@std/encoding@1/hex'
-import { Body, CinemaInfo, Movie, MovieHall, sortByPlayTime } from './types.ts'
+import {
+  Body,
+  CinemaInfo,
+  Movie,
+  MovieHall,
+  MovieInfoBody,
+  sortByPlayTime,
+} from './types.ts'
 import { csvDir } from './config.ts'
 
 const cfaApi = 'https://api.guoyingjiaying.cn/api/web/arrangementPage'
 const keyApi = 'https://api.guoyingjiaying.cn/api/web/getkey'
+const movieInfoApi = 'https://api.guoyingjiaying.cn/api/web/movieinfo'
 
 export const csvHeader = [
   'name',
@@ -50,6 +58,36 @@ async function getApiKey(unixTimestamp: number): Promise<string> {
   return keyData.data.token
 }
 
+async function fetchMovieDirector(
+  movieId: string,
+  unixTimestamp: number,
+  key: string,
+): Promise<string> {
+  const signer = await md5(`${movieId}${unixTimestamp}${key}`)
+
+  const res = await fetch(movieInfoApi, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      movieid: movieId,
+      t: unixTimestamp.toString(),
+      signer,
+    }).toString(),
+  })
+
+  if (!res.ok) return ''
+
+  const json = await res.json() as MovieInfoBody
+
+  const director = json.data?.movieActors?.find(
+    (actor) => actor.position === '导演',
+  )
+
+  return director?.readName ?? ''
+}
+
 export function getFirstDayOfNextMonth(date: Date = new Date()): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
 }
@@ -58,26 +96,25 @@ export function parseCinema(
   cinemaInfo: CinemaInfo,
   movieHall: MovieHall,
 ): string {
-  const cinema = cinemaInfo.slice(0, 3)
-
-  switch (cinema) {
-    case '小西天':
+  switch (cinemaInfo) {
+    case '小西天艺术影院':
       if (movieHall === '2号厅') {
-        return `${cinema}(2)`
+        return `小西天(2)`
       }
 
-      return cinema
-    case '百子湾':
-      return cinema
+      return '小西天'
+    case '百子湾艺术影院':
+      return '百子湾'
+    case '江南分馆影院':
+      return '江南'
   }
-
-  throw new Error(`Do not support cinema: [${cinemaInfo}].`)
 }
 
-export function formatJson(json: Body): Array<Movie> {
+export function formatJson(
+  json: Body,
+  directorMap?: Map<string, string>,
+): Array<Movie> {
   return json.data.records
-    // TODO: parse jiangnan cinema, and speart beijing and jiangnan movie information
-    .filter((record) => record.cinemaInfo !== '江南分馆影院')
     .map<Movie>((record) => {
       const playDate = new Date(record.playTime)
       playDate.setMinutes(
@@ -88,8 +125,7 @@ export function formatJson(json: Body): Array<Movie> {
         name: record.movieInfo.movieName,
         englishName: record.movieInfo.englishName,
         year: record.movieInfo.movieTime,
-        // TODO: To get director name from another api?
-        director: '',
+        director: directorMap?.get(record.movieInfo.movieName) ?? '',
         cinema: parseCinema(record.cinemaInfo, record.movieHall),
         playTime: record.playTime,
         endTime: dateFormat(playDate, 'yyyy-MM-dd HH:mm:ss'),
@@ -98,9 +134,12 @@ export function formatJson(json: Body): Array<Movie> {
 }
 
 export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
-  const movies: Array<Movie> = []
   const unixTimestamp = Date.now()
   const key = await getApiKey(unixTimestamp)
+
+  // First pass: collect all records and unique movieIds
+  const allRecords: Body[] = []
+  const movieIdToName = new Map<string, string>()
 
   for (
     const nextDay = new Date(firstDayOfMonth);
@@ -134,8 +173,48 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     }
 
     const json = await res.json() as Body
+    allRecords.push(json)
 
-    movies.push(...formatJson(json))
+    for (const record of json.data.records) {
+      if (record.movieId) {
+        movieIdToName.set(record.movieId, record.movieInfo.movieName)
+      }
+    }
+  }
+
+  // Fetch directors for unique movies
+  const directorMap = new Map<string, string>()
+  for (const [movieId, movieName] of movieIdToName) {
+    const director = await fetchMovieDirector(movieId, unixTimestamp, key)
+    if (director) {
+      directorMap.set(movieName, director)
+    }
+  }
+
+  // Second pass: transform records to movies with director info
+  const newMovies: Array<Movie> = []
+  for (const json of allRecords) {
+    newMovies.push(...formatJson(json, directorMap))
+  }
+
+  // Merge with existing data: preserve movies before the fetch start date
+  const filePath = `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`
+  const fetchStartDate = dateFormat(firstDayOfMonth, 'yyyy-MM-dd')
+  const movies: Array<Movie> = [...newMovies]
+
+  try {
+    const existingContent = await Deno.readTextFile(filePath)
+    const existingMovies = csvParse(existingContent, {
+      skipFirstRow: true,
+    }) as unknown as Movie[]
+    const preservedMovies = existingMovies.filter(
+      (movie) => movie.playTime < fetchStartDate,
+    )
+    movies.push(...preservedMovies)
+  } catch (error) {
+    if (!(error instanceof Deno.errors.NotFound)) {
+      throw error
+    }
   }
 
   if (movies.length <= 0) {
@@ -144,8 +223,6 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   }
 
   sortByPlayTime(movies)
-
-  const filePath = `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`
   const newContent = csvStringify(movies, { columns: csvHeader })
 
   try {
