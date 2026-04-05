@@ -1,10 +1,8 @@
 import { createEvents, DateArray, EventAttributes } from 'npm:ics@^3.5.0'
 import { encodeHex } from 'jsr:@std/encoding@1/hex'
 import { parse as csvParse } from 'jsr:@std/csv@1'
-import { Movie } from './types.ts'
-import { sortByPlayTime } from './json-to-csv.ts'
-
-export const csvDir = './assets/csv'
+import { Movie, sortByPlayTime } from './types.ts'
+import { csvDir } from './config.ts'
 
 function parseDate(date: Date): DateArray {
   return [

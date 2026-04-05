@@ -1,6 +1,4 @@
-import { format as dateFormat } from 'jsr:@std/datetime@0.225'
-
-export const icsDir = './assets/ics'
+import { icsDir, mergedIcsPath } from './config.ts'
 
 function extractIcsContent(content: string): string {
   const contents = content.split('\r\n')
@@ -14,48 +12,42 @@ function extractIcsContent(content: string): string {
 }
 
 export async function mergeIcsFiles() {
+  const files: string[] = []
+  for await (const entry of Deno.readDir(icsDir)) {
+    if (entry.isFile && entry.name.endsWith('.ics')) {
+      files.push(entry.name)
+    }
+  }
+  files.sort()
+
   let finalIcs = ''
   let header = ''
   let footer = ''
 
-  const monthAfterNext = new Date(Date.now())
-  monthAfterNext.setMonth(monthAfterNext.getMonth() + 2)
-  for (
-    const event = new Date(Date.parse('2023-05'));
-    event <= monthAfterNext;
-    event.setMonth(event.getMonth() + 1)
-  ) {
-    try {
-      const icsContent = await Deno.readTextFile(
-        `${icsDir}/${dateFormat(event, 'yyyy-MM')}.ics`,
-      )
-      const icsContents = icsContent.split('\r\n')
+  for (const file of files) {
+    const icsContent = await Deno.readTextFile(`${icsDir}/${file}`)
+    const icsContents = icsContent.split('\r\n')
 
-      if (header === '') {
-        header = icsContents.slice(
-          icsContents.indexOf('BEGIN:VCALENDAR'),
-          icsContents.indexOf('BEGIN:VEVENT'),
-        ).join('\n')
+    if (header === '') {
+      header = icsContents.slice(
+        icsContents.indexOf('BEGIN:VCALENDAR'),
+        icsContents.indexOf('BEGIN:VEVENT'),
+      ).join('\n')
 
-        finalIcs = header
-      }
-
-      if (footer === '') {
-        footer = icsContents.slice(
-          icsContents.indexOf('END:VCALENDAR'),
-        ).join('\n')
-      }
-
-      const onlyContext = extractIcsContent(icsContent)
-      finalIcs += '\n' + onlyContext
-    } catch (e: unknown) {
-      if (!(e instanceof Deno.errors.NotFound)) {
-        throw e
-      }
+      finalIcs = header
     }
+
+    if (footer === '') {
+      footer = icsContents.slice(
+        icsContents.indexOf('END:VCALENDAR'),
+      ).join('\n')
+    }
+
+    const onlyContext = extractIcsContent(icsContent)
+    finalIcs += '\n' + onlyContext
   }
 
   finalIcs += '\n' + footer
 
-  await Deno.writeTextFile('./assets/event.ics', finalIcs)
+  await Deno.writeTextFile(mergedIcsPath, finalIcs)
 }

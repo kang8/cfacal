@@ -45,7 +45,7 @@ snapshot[`Format json 1`] = `
     englishName: "What Do We See When We Look at the Sky?",
     name: "当我们仰望天空时看见什么？",
     playTime: "2023-05-07 11:00:00",
-    year: 2021,
+    year: "2021",
   },
   {
     cinema: "小西天",
@@ -54,7 +54,7 @@ snapshot[`Format json 1`] = `
     englishName: "Proxima",
     name: "比邻星",
     playTime: "2023-05-07 14:15:00",
-    year: 2019,
+    year: "2019",
   },
   {
     cinema: "小西天(2)",
@@ -63,7 +63,7 @@ snapshot[`Format json 1`] = `
     englishName: "Ryuichi Sakamoto: Async at The Park Avenue Armory",
     name: "坂本龙一：异步",
     playTime: "2023-05-07 17:00:00",
-    year: 2018,
+    year: "2018",
   },
   {
     cinema: "小西天",
@@ -72,7 +72,7 @@ snapshot[`Format json 1`] = `
     englishName: "Ryuichi Sakamoto: CODA",
     name: "坂本龙一：终曲",
     playTime: "2023-05-07 19:00:00",
-    year: 2017,
+    year: "2017",
   },
   {
     cinema: "百子湾",
@@ -81,7 +81,7 @@ snapshot[`Format json 1`] = `
     englishName: "On the Milky Road",
     name: "牛奶配送员的奇幻人生",
     playTime: "2023-05-07 13:30:00",
-    year: 2016,
+    year: "2016",
   },
   {
     cinema: "百子湾",
@@ -90,7 +90,7 @@ snapshot[`Format json 1`] = `
     englishName: "Black Cat, White Cat",
     name: "黑猫白猫",
     playTime: "2023-05-07 16:00:00",
-    year: 1998,
+    year: "1998",
   },
   {
     cinema: "百子湾",
@@ -99,7 +99,7 @@ snapshot[`Format json 1`] = `
     englishName: "Underground",
     name: "地下",
     playTime: "2023-05-07 18:30:00",
-    year: 1995,
+    year: "1995",
   },
 ]
 `;

@@ -1,7 +1,7 @@
 export type Movie = {
   name: string
   englishName: string
-  year: number
+  year: string
   director: string
   cinema: string
   playTime: string
@@ -28,4 +28,13 @@ export type Body = {
   }
   total: string
   size: string
+}
+
+export function sortByPlayTime(movies: Movie[]) {
+  movies.sort((a, b) => {
+    if (a.playTime !== b.playTime) {
+      return a.playTime.localeCompare(b.playTime)
+    }
+    return a.endTime.localeCompare(b.endTime)
+  })
 }

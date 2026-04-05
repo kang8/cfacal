@@ -21,7 +21,7 @@ Deno.test('Parse title', async (t) => {
     englishName: '',
     name: '弗兰兹',
     playTime: '2023-05-07 19:00:00',
-    year: 2016,
+    year: '2016',
     director: '弗朗索瓦·欧容',
   }, {
     cinema: '百子湾',
@@ -29,7 +29,7 @@ Deno.test('Parse title', async (t) => {
     englishName: 'Black Cat, White Cat',
     name: '黑猫白猫',
     playTime: '2023-05-07 16:00:00',
-    year: 1998,
+    year: '1998',
     director: '埃米尔·库斯图里卡 Emir Kusturiča',
   }]
 

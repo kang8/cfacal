@@ -2,13 +2,12 @@ import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import { stringify as csvStringify } from 'jsr:@std/csv@1'
 import { crypto } from 'jsr:@std/crypto@1'
 import { encodeHex } from 'jsr:@std/encoding@1/hex'
-import { Body, CinemaInfo, Movie, MovieHall } from './types.ts'
-import { csvDir } from './csv-to-ics.ts'
+import { Body, CinemaInfo, Movie, MovieHall, sortByPlayTime } from './types.ts'
+import { csvDir } from './config.ts'
 
 const cfaApi = 'https://api.guoyingjiaying.cn/api/web/arrangementPage'
 const keyApi = 'https://api.guoyingjiaying.cn/api/web/getkey'
 
-const patchFileName = 'diff.patch'
 export const csvHeader = [
   'name',
   'englishName',
@@ -35,6 +34,12 @@ async function getApiKey(unixTimestamp: number): Promise<string> {
       t: unixTimestamp.toString(),
     }),
   })
+
+  if (!keyResponse.ok) {
+    throw new Error(
+      `Key API request failed: HTTP ${keyResponse.status} ${keyResponse.statusText}`,
+    )
+  }
 
   const keyData = await keyResponse.json()
 
@@ -82,7 +87,7 @@ export function formatJson(json: Body): Array<Movie> {
       return {
         name: record.movieInfo.movieName,
         englishName: record.movieInfo.englishName,
-        year: parseInt(record.movieInfo.movieTime),
+        year: record.movieInfo.movieTime,
         // TODO: To get director name from another api?
         director: '',
         cinema: parseCinema(record.cinemaInfo, record.movieHall),
@@ -92,60 +97,10 @@ export function formatJson(json: Body): Array<Movie> {
     })
 }
 
-export function sortByPlayTime(movies: Movie[]) {
-  movies.sort((a, b) => {
-    if (a.playTime !== b.playTime) {
-      return a.playTime.localeCompare(b.playTime)
-    }
-    return a.endTime.localeCompare(b.endTime)
-  })
-}
-
-/**
- * Generate a patch string from diff command output
- * @param diffOutput - Raw output from the diff command
- * @returns Processed patch string ready for the patch command
- */
-export function generatePatchFromDiff(diffOutput: string): string {
-  const diffOutputs = diffOutput.split('\n')
-
-  let patch = ''
-
-  if (diffOutputs[0].includes('d')) { // delete
-    const range = diffOutputs[0].split('d')[0].split(',')
-    const from = parseInt(range[0])
-    const to = parseInt(range[1])
-
-    const deleteLine = to - from + 1 // add from itself
-
-    diffOutputs.splice(0, deleteLine + 1) // delete from 0 index
-
-    patch = diffOutputs.join('\n')
-  } else if (diffOutputs[0].includes('c')) { // changes
-    const [oldRange, newRange] = diffOutputs[0].split('c')
-
-    const oldFrom = parseInt(oldRange.split(',')[0])
-    const oldTo = parseInt(oldRange.split(',')[1] ?? oldFrom)
-
-    const newFrom = parseInt(newRange.split(',')[0])
-    const newTo = parseInt(newRange.split(',')[1] ?? newFrom)
-
-    const changeLine = newTo - newFrom + 1 // add newFrom itself
-    const deleteLine = oldTo - oldFrom + 1 - changeLine // add oldFrom itself and subtract changeLine
-
-    diffOutputs.splice(1, deleteLine)
-    diffOutputs[0] = `${oldTo - changeLine + 1},${oldTo}c${newFrom},${newTo}`
-
-    patch = diffOutputs.join('\n')
-  } else if (diffOutputs[0].includes('a')) { // adds
-    patch = diffOutputs.join('\n')
-  }
-
-  return patch
-}
-
 export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
   const movies: Array<Movie> = []
+  const unixTimestamp = Date.now()
+  const key = await getApiKey(unixTimestamp)
 
   for (
     const nextDay = new Date(firstDayOfMonth);
@@ -155,9 +110,6 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     const year = dateFormat(nextDay, 'yyyy')
     const month = dateFormat(nextDay, 'MM')
     const day = dateFormat(nextDay, 'dd')
-    const unixTimestamp = Date.now()
-
-    const key = await getApiKey(unixTimestamp)
 
     const signer = await md5(`${year}${month}${day}${unixTimestamp}${key}`)
 
@@ -175,87 +127,56 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       }).toString(),
     })
 
+    if (!res.ok) {
+      throw new Error(
+        `API request failed for ${year}-${month}-${day}: HTTP ${res.status} ${res.statusText}`,
+      )
+    }
+
     const json = await res.json() as Body
 
     movies.push(...formatJson(json))
   }
 
+  if (movies.length <= 0) {
+    console.log(`No data Fetch in ${dateFormat(firstDayOfMonth, 'yyyy-MM')}.`)
+    return
+  }
+
   sortByPlayTime(movies)
 
   const filePath = `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`
+  const newContent = csvStringify(movies, { columns: csvHeader })
 
-  try { // is file exist
+  try {
     await Deno.lstat(filePath)
 
-    await Deno.writeTextFile(
-      filePath + '.new',
-      csvStringify(movies, {
-        columns: csvHeader,
-      }),
-    )
+    const tmpPath = filePath + '.new'
+    await Deno.writeTextFile(tmpPath, newContent)
+
+    const { stdout } = await new Deno.Command('diff', {
+      args: [filePath, tmpPath],
+    }).output()
+    const diffOutput = new TextDecoder().decode(stdout)
+
+    await Deno.remove(tmpPath)
+
+    if (!diffOutput) {
+      console.info(
+        `[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`,
+      )
+      return
+    }
 
     console.info(
       `Comparing changes for [${dateFormat(firstDayOfMonth, 'yyyy-MM')}]`,
     )
-
-    const diffCommand = new Deno.Command('diff', {
-      args: [
-        filePath,
-        filePath + '.new',
-      ],
-    })
-
-    const { stdout } = await diffCommand.output()
-    const diffOutput = new TextDecoder().decode(stdout)
-
-    console.log(diffOutput) // Output diff result for debugging and change tracking
-
-    const patch = generatePatchFromDiff(diffOutput)
-
-    if (!patch) {
-      console.info(
-        `[${dateFormat(firstDayOfMonth, 'yyyy-MM')}] without any change!!!`,
-      )
-    }
-
-    await Deno.writeTextFile(patchFileName, patch)
-
-    // followed by https://github.com/denoland/deno/blob/c213ad380f349dee1f65e6d9a9f7a8fa669b2af2/cli/tests/unit/command_test.ts#L206-L233
-    // TODO: May be have a sort way: https://github.com/denoland/deno/blob/c213ad380f349dee1f65e6d9a9f7a8fa669b2af2/cli/tests/unit/command_test.ts#L56-L84
-    const patchCommand = new Deno.Command('patch', {
-      args: [
-        filePath,
-      ],
-      stdin: 'piped',
-    })
-
-    const child = patchCommand.spawn()
-
-    const file = await Deno.open(patchFileName)
-    await file.readable.pipeTo(child.stdin, {
-      preventClose: true,
-    })
-
-    await child.stdin.close()
-
-    await Deno.remove(patchFileName)
-    await Deno.remove(filePath + '.new')
+    console.log(diffOutput)
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
       throw error
     }
-
-    if (movies.length <= 0) {
-      console.log(`No data Fetch in ${dateFormat(firstDayOfMonth, 'yyyy-MM')}.`)
-
-      return
-    }
-
-    await Deno.writeTextFile(
-      filePath,
-      csvStringify(movies, {
-        columns: csvHeader,
-      }),
-    )
   }
+
+  await Deno.writeTextFile(filePath, newContent)
 }

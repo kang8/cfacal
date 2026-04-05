@@ -1,10 +1,11 @@
-import { csvDir, csvToIcs } from './csv-to-ics.ts'
+import { csvToIcs } from './csv-to-ics.ts'
 import {
   fetchJsonAndConvertToCsv,
   getFirstDayOfNextMonth,
 } from './json-to-csv.ts'
 import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import { mergeIcsFiles } from './merge-ics.ts'
+import { csvDir } from './config.ts'
 ;(async () => {
   const action = Deno.args[0]
 
