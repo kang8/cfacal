@@ -199,9 +199,10 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
     newMovies.push(...formatJson(json, directorMap))
   }
 
-  // Merge with existing data: preserve movies before the fetch start date
+  // Merge with existing data: preserve movies before the current time
+  // so that already-started showtimes (no longer returned by the API) are not lost
   const filePath = `${csvDir}/${dateFormat(firstDayOfMonth, 'yyyy-MM')}.csv`
-  const fetchStartDate = dateFormat(firstDayOfMonth, 'yyyy-MM-dd')
+  const now = dateFormat(new Date(), 'yyyy-MM-dd HH:mm:ss')
   const movies: Array<Movie> = [...newMovies]
 
   try {
@@ -210,7 +211,7 @@ export async function fetchJsonAndConvertToCsv(firstDayOfMonth: Date) {
       skipFirstRow: true,
     }) as unknown as Movie[]
     const preservedMovies = existingMovies.filter(
-      (movie) => movie.playTime < fetchStartDate,
+      (movie) => movie.playTime < now,
     )
     movies.push(...preservedMovies)
   } catch (error) {
