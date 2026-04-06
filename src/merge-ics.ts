@@ -1,4 +1,8 @@
 import {
+  archiveDir,
+  archivedIcsBeijingPath,
+  archivedIcsPath,
+  archivedIcsShuzhouPath,
   icsDir,
   mergedIcsBeijingPath,
   mergedIcsPath,
@@ -25,6 +29,16 @@ function extractVEvents(content: string): string[] {
   }
 
   return events
+}
+
+function isUpcomingEvent(event: string): boolean {
+  const match = event.match(/DTSTART:(\d{8})/)
+  if (!match) return false
+  const today = new Date()
+  const todayStr = today.getFullYear().toString() +
+    (today.getMonth() + 1).toString().padStart(2, '0') +
+    today.getDate().toString().padStart(2, '0')
+  return match[1] >= todayStr
 }
 
 function isShuzhouEvent(event: string): boolean {
@@ -75,10 +89,19 @@ export async function mergeIcsFiles() {
     }
   }
 
+  await Deno.mkdir(archiveDir, { recursive: true })
+
+  const upcomingAll = allEvents.filter(isUpcomingEvent)
+  const upcomingBeijing = beijingEvents.filter(isUpcomingEvent)
+  const upcomingShuzhou = shuzhouEvents.filter(isUpcomingEvent)
+
   const outputs: [string[], string][] = [
-    [allEvents, mergedIcsPath],
-    [beijingEvents, mergedIcsBeijingPath],
-    [shuzhouEvents, mergedIcsShuzhouPath],
+    [upcomingAll, mergedIcsPath],
+    [upcomingBeijing, mergedIcsBeijingPath],
+    [upcomingShuzhou, mergedIcsShuzhouPath],
+    [allEvents, archivedIcsPath],
+    [beijingEvents, archivedIcsBeijingPath],
+    [shuzhouEvents, archivedIcsShuzhouPath],
   ]
 
   for (const [events, path] of outputs) {
