@@ -1,0 +1,51 @@
+name: Monthly Prune
+
+on:
+  workflow_dispatch: # allow manual triggering
+  schedule:
+    - cron: '0 7 1 * *'  # At 07:00 UTC (15:00 Beijing) on the 1st of every month
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: szenius/set-timezone@v2.0
+        with:
+          timezoneLinux: 'Asia/Shanghai'
+
+      - uses: actions/checkout@v6
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.7.12
+
+      - uses: actions/cache@v5
+        name: Setup deno cache
+        with:
+          path: |
+            ~/.deno
+            ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
+
+      - name: Prune old months
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          deno task dev prune
+
+          if [[ -n $(git status --porcelain) ]]; then
+            git config push.autoSetupRemote true
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git checkout -b prune/$(date -u +%Y-%m)--$RANDOM
+
+            git add .
+            git commit --message="chore(data): Monthly prune"
+            git push
+
+            gh pr create --base master --title 'Monthly prune' --body 'Created by Github action'
+          else
+            echo "Have not file change."
+          fi

@@ -5,6 +5,7 @@ import {
 } from './json-to-csv.ts'
 import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import { mergeIcsFiles } from './merge-ics.ts'
+import { pruneOldMonths } from './prune-ics.ts'
 import { csvDir } from './config.ts'
 ;(async () => {
   const action = Deno.args[0]
@@ -48,7 +49,13 @@ import { csvDir } from './config.ts'
       await mergeIcsFiles()
       break
 
+    case 'prune':
+      await pruneOldMonths()
+      break
+
     default:
-      console.log(`Please insert the argument: fetch, convert or merge.`)
+      console.log(
+        `Please insert the argument: fetch, convert, merge or prune.`,
+      )
   }
 })()
