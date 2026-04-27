@@ -62,6 +62,11 @@ export function uidOf(event: string): string {
   return match ? match[1].trim() : event
 }
 
+export function eventYearMonth(event: string): string {
+  const match = event.match(/DTSTART:(\d{6})/)
+  return match ? match[1] : ''
+}
+
 export async function readEventsFromFile(path: string): Promise<string[]> {
   try {
     const content = await Deno.readTextFile(path)
@@ -72,13 +77,21 @@ export async function readEventsFromFile(path: string): Promise<string[]> {
   }
 }
 
-async function unionByUid(
+// Past months come from existing file (they may have been pruned out of source
+// per-month files, and we don't want to resurrect them). Current and future
+// months are taken entirely from `fresh` — this lets re-keyed UIDs (e.g. when
+// a movie's English title is normalized) replace the old entry instead of
+// piling up alongside it.
+async function mergeByMonthBoundary(
   existingPath: string,
   fresh: string[],
+  cutoffYyyymm: string,
 ): Promise<string[]> {
   const byUid = new Map<string, string>()
   for (const event of await readEventsFromFile(existingPath)) {
-    byUid.set(uidOf(event), event)
+    if (eventYearMonth(event) < cutoffYyyymm) {
+      byUid.set(uidOf(event), event)
+    }
   }
   for (const event of fresh) {
     byUid.set(uidOf(event), event)
@@ -138,17 +151,37 @@ export async function mergeIcsFiles() {
 
   await Deno.mkdir(archiveDir, { recursive: true })
 
-  const mergedAll = await unionByUid(mergedIcsPath, recentAll)
-  const mergedBeijing = await unionByUid(mergedIcsBeijingPath, recentBeijing)
-  const mergedShuzhou = await unionByUid(mergedIcsShuzhouPath, recentShuzhou)
-  const archiveAll = await unionByUid(archivedIcsPath, allArchiveEvents)
-  const archiveBeijing = await unionByUid(
+  const cutoffYyyymm = currentYearMonth.replace('-', '')
+
+  const mergedAll = await mergeByMonthBoundary(
+    mergedIcsPath,
+    recentAll,
+    cutoffYyyymm,
+  )
+  const mergedBeijing = await mergeByMonthBoundary(
+    mergedIcsBeijingPath,
+    recentBeijing,
+    cutoffYyyymm,
+  )
+  const mergedShuzhou = await mergeByMonthBoundary(
+    mergedIcsShuzhouPath,
+    recentShuzhou,
+    cutoffYyyymm,
+  )
+  const archiveAll = await mergeByMonthBoundary(
+    archivedIcsPath,
+    allArchiveEvents,
+    cutoffYyyymm,
+  )
+  const archiveBeijing = await mergeByMonthBoundary(
     archivedIcsBeijingPath,
     allArchiveBeijing,
+    cutoffYyyymm,
   )
-  const archiveShuzhou = await unionByUid(
+  const archiveShuzhou = await mergeByMonthBoundary(
     archivedIcsShuzhouPath,
     allArchiveShuzhou,
+    cutoffYyyymm,
   )
 
   const outputs: [string[], string][] = [
