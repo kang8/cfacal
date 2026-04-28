@@ -106,7 +106,7 @@ export function parseCinema(
     case '百子湾艺术影院':
       return '百子湾'
     case '江南分馆影院':
-      return '江南'
+      return `江南(${movieHall.replace('号厅', '')})`
     default:
       throw new Error(`Do not support cinema: [${cinemaInfo}].`)
   }
