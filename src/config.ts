@@ -3,7 +3,13 @@ export const icsDir = './assets/ics'
 export const archiveDir = './assets/archive'
 export const mergedIcsPath = './assets/event.ics'
 export const mergedIcsBeijingPath = './assets/event-beijing.ics'
+export const mergedIcsXiaoxitianPath = './assets/event-beijing-xiaoxitian.ics'
+export const mergedIcsBaiziwanPath = './assets/event-beijing-baiziwan.ics'
 export const mergedIcsShuzhouPath = './assets/event-shuzhou.ics'
 export const archivedIcsPath = './assets/archive/event.ics'
 export const archivedIcsBeijingPath = './assets/archive/event-beijing.ics'
+export const archivedIcsXiaoxitianPath =
+  './assets/archive/event-beijing-xiaoxitian.ics'
+export const archivedIcsBaiziwanPath =
+  './assets/archive/event-beijing-baiziwan.ics'
 export const archivedIcsShuzhouPath = './assets/archive/event-shuzhou.ics'

@@ -1,13 +1,17 @@
 import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import {
+  archivedIcsBaiziwanPath,
   archivedIcsBeijingPath,
   archivedIcsPath,
   archivedIcsShuzhouPath,
+  archivedIcsXiaoxitianPath,
   archiveDir,
   icsDir,
+  mergedIcsBaiziwanPath,
   mergedIcsBeijingPath,
   mergedIcsPath,
   mergedIcsShuzhouPath,
+  mergedIcsXiaoxitianPath,
 } from './config.ts'
 
 export function extractVEvents(content: string): string[] {
@@ -47,6 +51,16 @@ export function extractHeaderFooter(
 export function isShuzhouEvent(event: string): boolean {
   const match = event.match(/SUMMARY:(.+)/)
   return match !== null && match[1].startsWith('江南')
+}
+
+export function isXiaoxitianEvent(event: string): boolean {
+  const match = event.match(/SUMMARY:(.+)/)
+  return match !== null && match[1].startsWith('小西天')
+}
+
+export function isBaiziwanEvent(event: string): boolean {
+  const match = event.match(/SUMMARY:(.+)/)
+  return match !== null && match[1].startsWith('百子湾')
 }
 
 export function buildIcs(
@@ -118,11 +132,15 @@ export async function mergeIcsFiles() {
   const recentAll: string[] = []
   const recentBeijing: string[] = []
   const recentShuzhou: string[] = []
+  const recentXiaoxitian: string[] = []
+  const recentBaiziwan: string[] = []
 
   // All events for archive accumulation.
   const allArchiveEvents: string[] = []
   const allArchiveBeijing: string[] = []
   const allArchiveShuzhou: string[] = []
+  const allArchiveXiaoxitian: string[] = []
+  const allArchiveBaiziwan: string[] = []
 
   for (const file of allFiles) {
     const icsContent = await Deno.readTextFile(`${icsDir}/${file}`)
@@ -144,6 +162,13 @@ export async function mergeIcsFiles() {
       } else {
         allArchiveBeijing.push(event)
         if (isRecent) recentBeijing.push(event)
+        if (isXiaoxitianEvent(event)) {
+          allArchiveXiaoxitian.push(event)
+          if (isRecent) recentXiaoxitian.push(event)
+        } else if (isBaiziwanEvent(event)) {
+          allArchiveBaiziwan.push(event)
+          if (isRecent) recentBaiziwan.push(event)
+        }
       }
       if (isRecent) recentAll.push(event)
     }
@@ -168,6 +193,16 @@ export async function mergeIcsFiles() {
     recentShuzhou,
     cutoffYyyymm,
   )
+  const mergedXiaoxitian = await mergeByMonthBoundary(
+    mergedIcsXiaoxitianPath,
+    recentXiaoxitian,
+    cutoffYyyymm,
+  )
+  const mergedBaiziwan = await mergeByMonthBoundary(
+    mergedIcsBaiziwanPath,
+    recentBaiziwan,
+    cutoffYyyymm,
+  )
   const archiveAll = await mergeByMonthBoundary(
     archivedIcsPath,
     allArchiveEvents,
@@ -183,14 +218,28 @@ export async function mergeIcsFiles() {
     allArchiveShuzhou,
     cutoffYyyymm,
   )
+  const archiveXiaoxitian = await mergeByMonthBoundary(
+    archivedIcsXiaoxitianPath,
+    allArchiveXiaoxitian,
+    cutoffYyyymm,
+  )
+  const archiveBaiziwan = await mergeByMonthBoundary(
+    archivedIcsBaiziwanPath,
+    allArchiveBaiziwan,
+    cutoffYyyymm,
+  )
 
   const outputs: [string[], string][] = [
     [mergedAll, mergedIcsPath],
     [mergedBeijing, mergedIcsBeijingPath],
     [mergedShuzhou, mergedIcsShuzhouPath],
+    [mergedXiaoxitian, mergedIcsXiaoxitianPath],
+    [mergedBaiziwan, mergedIcsBaiziwanPath],
     [archiveAll, archivedIcsPath],
     [archiveBeijing, archivedIcsBeijingPath],
     [archiveShuzhou, archivedIcsShuzhouPath],
+    [archiveXiaoxitian, archivedIcsXiaoxitianPath],
+    [archiveBaiziwan, archivedIcsBaiziwanPath],
   ]
 
   for (const [events, path] of outputs) {
