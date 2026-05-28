@@ -1,8 +1,10 @@
 import { format as dateFormat } from 'jsr:@std/datetime@0.225'
 import {
+  mergedIcsBaiziwanPath,
   mergedIcsBeijingPath,
   mergedIcsPath,
   mergedIcsShuzhouPath,
+  mergedIcsXiaoxitianPath,
 } from './config.ts'
 import { buildIcs, extractHeaderFooter, extractVEvents } from './merge-ics.ts'
 
@@ -42,5 +44,7 @@ export async function pruneOldMonths() {
 
   await pruneFile(mergedIcsPath, cutoff)
   await pruneFile(mergedIcsBeijingPath, cutoff)
+  await pruneFile(mergedIcsXiaoxitianPath, cutoff)
+  await pruneFile(mergedIcsBaiziwanPath, cutoff)
   await pruneFile(mergedIcsShuzhouPath, cutoff)
 }
