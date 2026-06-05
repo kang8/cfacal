@@ -10,19 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions Repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
       - name: Spell Check Repo
-        uses: crate-ci/typos@v1.47.0
+        uses: crate-ci/typos@v1.47.2
   lint-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2.0.4
         with:
-          deno-version: 2.8.1
+          deno-version: 2.8.2
 
       - uses: actions/cache@v5.0.5
         name: Setup deno cache
