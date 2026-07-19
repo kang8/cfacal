@@ -1,9 +1,8 @@
 name: Schedule Run
 
 on:
-  workflow_dispatch: # allow manual triggering
-  schedule:
-    - cron: '11 5 * * *'  # At 05:11 UTC (13:11 in Beijing) on every day
+  # Triggered daily by Inngest (15:00 Beijing) and manual runs.
+  workflow_dispatch:
 
 jobs:
   schedule:
